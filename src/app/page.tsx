@@ -1,29 +1,19 @@
 import { CreatePost } from "~/app/_components/create-post";
 import { api } from "~/trpc/server";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { CreatePostWizard } from "~/app/_components/CreatePostWizard";
 
 export default async function Home() {
-  const hello = await api.post.hello.query({ text: "from tRPC" });
-
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
+    <main className="">
       <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-        <div className="">
-          <SignedIn>
-            {/* Mount the UserButton component */}
-            <UserButton />
-          </SignedIn>
-          <SignedOut>
-            {/* SignedOut users get sign in button */}
-            <SignInButton />
-          </SignedOut>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-2xl text-white">
-            {hello ? hello.greeting : "Loading tRPC query..."}
-          </p>
-        </div>
-
+        <SignedIn>
+          <UserButton />
+          <CreatePostWizard />
+        </SignedIn>
+        <SignedOut>
+          <SignInButton />
+        </SignedOut>
         <CrudShowcase />
       </div>
     </main>
@@ -31,15 +21,15 @@ export default async function Home() {
 }
 
 async function CrudShowcase() {
-  const latestPost = await api.post.getLatest.query();
+  const data = await api.post.getAll.query();
 
   return (
     <div className="w-full max-w-xs">
-      {latestPost ? (
-        <p className="truncate">Your most recent post: {latestPost.name}</p>
-      ) : (
-        <p>You have no posts yet.</p>
-      )}
+      {data?.map(({ post, author }) => (
+        <div key={post.id}>
+          {post.content} by {author?.username}
+        </div>
+      ))}
 
       <CreatePost />
     </div>

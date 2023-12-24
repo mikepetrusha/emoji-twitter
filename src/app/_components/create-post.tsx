@@ -4,10 +4,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { api } from "~/trpc/react";
+import { useUser } from "@clerk/nextjs";
 
 export function CreatePost() {
   const router = useRouter();
   const [name, setName] = useState("");
+  const { user } = useUser();
 
   const createPost = api.post.create.useMutation({
     onSuccess: () => {
@@ -20,7 +22,7 @@ export function CreatePost() {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        createPost.mutate({ name });
+        createPost.mutate({ content: name, authorId: user?.id ?? "" });
       }}
       className="flex flex-col gap-2"
     >
